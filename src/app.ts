@@ -9,10 +9,10 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.use('/api/v1', routes);
+app.use('/api', routes);
 
 // Root Health Check
-app.get('/', (_req, res) => {
+app.get('/', (req, res) => {
   res.send({ success: true, message: 'Server is running smoothly' });
 });
 
