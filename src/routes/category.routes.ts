@@ -12,17 +12,44 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { name, description } = req.body;
 
-    const category = await prisma.category.create({
-      data: { name, description },
+    // Fix 1: Explicit validation for missing/empty name
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category name is required and must be a non-empty string',
+      });
+    }
+
+    // Fix 2: Prevent unhandled Prisma unique constraint crash
+    const existingCategory = await prisma.category.findUnique({
+      where: { name: name.trim() },
     });
 
-    res.status(201).json({
+    if (existingCategory) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category with this name already exists',
+      });
+    }
+
+    const category = await prisma.category.create({
+      data: {
+        name: name.trim(),
+        description: description || null,
+      },
+    });
+
+    return res.status(201).json({
       success: true,
       message: 'Category created successfully',
       data: category,
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to create category', error });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to create category',
+      error: error?.message || error,
+    });
   }
 });
 
@@ -38,13 +65,17 @@ router.get('/', async (_req: Request, res: Response) => {
       },
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Categories retrieved successfully',
       data: categories,
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to retrieve categories', error });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve categories',
+      error: error?.message || error,
+    });
   }
 });
 
@@ -65,13 +96,17 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Category retrieved successfully',
       data: category,
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to retrieve category', error });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve category',
+      error: error?.message || error,
+    });
   }
 });
 
@@ -84,18 +119,34 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     }
     const { name, description } = req.body;
 
-    const category = await prisma.category.update({
-      where: { id },
-      data: { name, description },
+    // Check if category exists before updating
+    const existingCategory = await prisma.category.findFirst({
+      where: { id, isDeleted: false },
     });
 
-    res.json({
+    if (!existingCategory) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+
+    const category = await prisma.category.update({
+      where: { id },
+      data: {
+        ...(name && { name: name.trim() }),
+        ...(description !== undefined && { description }),
+      },
+    });
+
+    return res.json({
       success: true,
       message: 'Category updated successfully',
       data: category,
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to update category', error });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update category',
+      error: error?.message || error,
+    });
   }
 });
 
@@ -107,18 +158,30 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ success: false, message: 'Invalid category id' });
     }
 
+    const existingCategory = await prisma.category.findFirst({
+      where: { id, isDeleted: false },
+    });
+
+    if (!existingCategory) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+
     await prisma.category.update({
       where: { id },
       data: { isDeleted: true },
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Category soft-deleted successfully',
       data: null,
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to delete category', error });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to delete category',
+      error: error?.message || error,
+    });
   }
 });
 
