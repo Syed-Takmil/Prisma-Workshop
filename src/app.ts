@@ -16,7 +16,14 @@ app.get('/', (req, res) => {
   res.send({ success: true, message: 'Server is running smoothly' });
 });
 
-// Global Error Handler (Must be registered last)
-app.use(globalErrorHandler);
+// Catch-all 404 for unknown routes
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+  });
+});
 
+// Global Error Handler
+app.use(globalErrorHandler);
 export default app;
