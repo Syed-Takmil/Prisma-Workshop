@@ -2,7 +2,7 @@
 
 
 import { Router } from 'express';
-import bcrypt from 'bcrypt';
+const bcrypt = require('bcrypt');
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 

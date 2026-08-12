@@ -1,4 +1,6 @@
 import { PrismaClient, UserRole, ProductStatus } from '@prisma/client';
+
+declare module 'bcrypt';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
