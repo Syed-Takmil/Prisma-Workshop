@@ -1,8 +1,7 @@
 
 
-
 import { Router } from 'express';
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcryptjs'; // Use bcryptjs instead of require('bcrypt')
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 
@@ -12,6 +11,14 @@ const router = Router();
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+
+    // Validate required fields explicitly
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: name, email, and password are required',
+      });
+    }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -25,7 +32,7 @@ router.post('/register', async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        role: role || 'CUSTOMER',
+        role: role === 'ADMIN' ? 'ADMIN' : 'CUSTOMER', // Strict Enum matching
       },
       select: {
         id: true,
@@ -41,8 +48,12 @@ router.post('/register', async (req, res) => {
       message: 'User registered successfully',
       data: user,
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to register user', error });
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to register user', 
+      error: error?.message || error 
+    });
   }
 });
 
