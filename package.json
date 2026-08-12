@@ -2,12 +2,12 @@
   "name": "scic-ejp13-backend",
   "version": "1.0.0",
   "main": "dist/server.js",
-  "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "npx prisma generate && tsc",
-    "postinstall": "npx prisma generate",
-    "start": "node dist/server.js"
-  },
+ "scripts": {
+  "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+  "build": "prisma generate && tsc",
+  "postinstall": "prisma generate",
+  "start": "node dist/server.js"
+},
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcrypt": "^6.0.0",
