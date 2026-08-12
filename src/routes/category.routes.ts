@@ -4,6 +4,9 @@ import { authenticate, AuthRequest } from '../middlewares/auth';
 
 const router = Router();
 
+const normalizeIdParam = (id: string | string[] | undefined): string | undefined =>
+  Array.isArray(id) ? id[0] : id;
+
 // Create Category (Protected)
 router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
@@ -48,7 +51,10 @@ router.get('/', async (_req: Request, res: Response) => {
 // Get Category By ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = normalizeIdParam(req.params.id);
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Invalid category id' });
+    }
 
     const category = await prisma.category.findFirst({
       where: { id, isDeleted: false },
@@ -72,7 +78,10 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Update Category (Protected)
 router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = normalizeIdParam(req.params.id);
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Invalid category id' });
+    }
     const { name, description } = req.body;
 
     const category = await prisma.category.update({
@@ -93,7 +102,10 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 // Soft Delete Category (Protected)
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = normalizeIdParam(req.params.id);
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Invalid category id' });
+    }
 
     await prisma.category.update({
       where: { id },

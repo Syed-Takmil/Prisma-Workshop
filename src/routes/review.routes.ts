@@ -40,7 +40,8 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response, next: Nex
 // Get Reviews for a Specific Product
 router.get('/product/:productId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { productId } = req.params;
+    const rawProductId = req.params.productId;
+    const productId = Array.isArray(rawProductId) ? rawProductId[0] : rawProductId;
 
     const reviews = await prisma.review.findMany({
       where: {
@@ -66,7 +67,8 @@ router.get('/product/:productId', async (req: Request, res: Response, next: Next
 // Get Review By ID
 router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
     const review = await prisma.review.findFirst({
       where: { id, isDeleted: false },
@@ -91,9 +93,10 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // Soft Delete Review (Protected)
-router.delete('/:id', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.delete('/:id', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
     await prisma.review.update({
       where: { id },

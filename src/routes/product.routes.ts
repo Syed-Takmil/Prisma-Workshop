@@ -66,7 +66,8 @@ router.get('/', async (_req: Request, res: Response) => {
 // Get Product By ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
     const product = await prisma.product.findFirst({
       where: { id, isDeleted: false },
@@ -97,7 +98,8 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Update Product (Protected)
 router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const rawId = (req as any).params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
     const updateData = req.body;
 
     if (updateData.price) updateData.price = parseFloat(updateData.price);
@@ -121,7 +123,8 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 // Soft Delete Product (Protected)
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
     await prisma.product.update({
       where: { id },
