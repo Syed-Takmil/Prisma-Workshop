@@ -4,8 +4,11 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc && prisma generate",
-    "postinstall": "prisma generate",
+    "build": "npx prisma generate && tsc",
+    "postinstall": "npx prisma generate",
     "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "prisma": "^7.9.1"
   }
 }
