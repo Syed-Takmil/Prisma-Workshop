@@ -2,11 +2,9 @@
   "name": "scic-ejp13-backend",
   "version": "1.0.0",
   "main": "dist/server.js",
- "scripts": {
-  "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+"scripts": {
   "build": "prisma generate && tsc",
-  "postinstall": "prisma generate",
-  "start": "node dist/server.js"
+  "postinstall": "prisma generate"
 },
   "dependencies": {
     "@prisma/client": "^5.22.0",
